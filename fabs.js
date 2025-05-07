@@ -1,137 +1,128 @@
+// showme-plugin.js
 (function () {
-  // Avoid duplicate injection
-  if (window.__showmePluginLoaded) return;
-  window.__showmePluginLoaded = true;
+  // Create main container
+  const container = document.createElement("div");
+  container.className = "showme-floating-container";
+  document.body.appendChild(container);
 
-  // Create a style tag
+  // Create main FAB
+  const mainButton = document.createElement("div");
+  mainButton.className = "showme-main-button";
+  mainButton.innerHTML = `
+    <div class="showme-main-button-icon">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" stroke="white" stroke-width="8"/>
+        <rect x="30" y="35" width="6" height="30" rx="3" fill="white"/>
+        <rect x="45" y="25" width="6" height="50" rx="3" fill="white"/>
+        <rect x="60" y="35" width="6" height="30" rx="3" fill="white"/>
+      </svg>
+    </div>`;
+  container.appendChild(mainButton);
+
+  // Buttons data
+  const buttons = [
+    {
+      id: "close",
+      title: "Close",
+      icon: `<svg width='15' height='15' viewBox='0 0 15 15'><path d='M13.7 1.6L1.6 13.7M1.6 1.6L13.7 13.7' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>`,
+      x: -70.71,
+      y: -70.71
+    },
+    {
+      id: "mic",
+      title: "Mic",
+      icon: `<svg width='17' height='23' viewBox='0 0 17 23'><path d='M15.9 9.6V11.7C15.9 15.6 12.8 18.8 8.8 18.8M1.7 9.6V11.7C1.7 15.6 4.9 18.8 8.8 18.8M8.8 18.8V21.8M4.8 21.8H12.9M8.8 14.7C7.2 14.7 5.8 13.3 5.8 11.7V4.6C5.8 2.9 7.2 1.5 8.8 1.5C10.5 1.5 11.9 2.9 11.9 4.6V11.7C11.9 13.3 10.5 14.7 8.8 14.7Z' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>`,
+      x: 70.71,
+      y: -70.71
+    },
+    {
+      id: "pencil",
+      title: "Draw",
+      icon: `<svg width='21' height='21' viewBox='0 0 21 20'><path d='M10.7 18.8H19.8M1.5 18.8H3.2C3.7 18.8 4.0 18.8 4.2 18.7C4.4 18.7 4.6 18.6 4.8 18.5C5.0 18.4 5.2 18.2 5.5 17.8L18.3 5.1C19.1 4.2 19.1 2.9 18.3 2.0C17.4 1.2 16.1 1.2 15.2 2.0L2.5 14.8C2.1 15.1 2.0 15.3 1.8 15.5C1.7 15.7 1.6 15.9 1.6 16.1C1.5 16.3 1.5 16.6 1.5 17.1V18.8Z' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>`,
+      x: 100,
+      y: 0
+    },
+    {
+      id: "expand",
+      title: "Expand",
+      icon: `<svg width='21' height='21' viewBox='0 0 21 21'><path d='M14.7 19.8H14.9C16.6 19.8 17.5 19.8 18.1 19.5C18.7 19.2 19.2 18.7 19.5 18.1C19.8 17.5 19.8 16.6 19.8 14.9V6.4C19.8 4.7 19.8 3.8 19.5 3.2C19.2 2.6 18.7 2.2 18.1 1.9C17.5 1.5 16.6 1.5 14.9 1.5H6.4C4.7 1.5 3.8 1.5 3.2 1.9C2.6 2.2 2.2 2.6 1.9 3.2C1.5 3.8 1.5 4.7 1.5 6.4M10.2 11.2L15.7 5.6M15.7 5.6H10.7M15.7 5.6V10.7' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>`,
+      x: 70.71,
+      y: 70.71
+    }
+  ];
+
+  // Create satellite buttons
+  buttons.forEach(btn => {
+    const el = document.createElement("div");
+    el.className = `showme-satellite-button showme-${btn.id}`;
+    el.title = btn.title;
+    el.innerHTML = `<div class='showme-satellite-icon'>${btn.icon}</div>`;
+    el.style.left = `calc(50% + ${btn.x}px)`;
+    el.style.top = `calc(50% + ${btn.y}px)`;
+    container.appendChild(el);
+  });
+
+  // Styles
   const style = document.createElement("style");
   style.textContent = `
     .showme-floating-container {
       position: fixed;
-      bottom: 20px;
-      left: 20px;
+      bottom: 50px;
+      left: 50px;
       width: 300px;
       height: 300px;
       pointer-events: none;
       z-index: 9999;
     }
-
     .showme-main-button {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      transform: translate(0%, 0%);
-      width: 80.3px;
-      height: 80.3px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90px;
+      height: 90px;
       background-color: #6941C6;
+      border: 6px solid #9E77ED;
       border-radius: 50%;
-      border: 8.3px solid #9E77ED;
       display: flex;
       justify-content: center;
       align-items: center;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      transition: transform 0.2s ease-in-out;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       pointer-events: auto;
     }
-
-    .showme-main-button:hover {
-      transform: scale(1.05);
-    }
-
-    .showme-main-icon {
+    .showme-main-button-icon {
       width: 64px;
       height: 64px;
-      background-image: url('data:image/svg+xml;utf8,<svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 10h2v4H4v-4zm7 0h2v4h-2v-4zm7 0h2v4h-2v-4z"/></svg>');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 60%;
+      color: white;
     }
-
     .showme-satellite-button {
       position: absolute;
-      width: 34px;
-      height: 34px;
-      border: 5.6px solid #9E77ED;
-      border-radius: 50%;
+      width: 40px;
+      height: 40px;
       background-color: #6941C6;
+      border: 4px solid #9E77ED;
+      border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
-      cursor: pointer;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-      transition: transform 0.2s ease-in-out;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s;
       pointer-events: auto;
     }
-
     .showme-satellite-button:hover {
       transform: scale(1.1);
       background-color: #9E77ED;
     }
-
     .showme-satellite-icon {
       width: 20px;
       height: 20px;
+      color: white;
     }
-
-    .showme-btn-close   { top: 20px;  left: 30px; }
-    .showme-btn-mic     { top: 45px;  left: 80px; }
-    .showme-btn-pencil  { top: 95px;  left: 90px; }
-    .showme-btn-expand  { top: 150px; left: 70px; }
+    .showme-satellite-icon svg {
+      width: 100%;
+      height: 100%;
+    }
   `;
   document.head.appendChild(style);
-
-  // Create the container
-  const container = document.createElement("div");
-  container.className = "showme-floating-container";
-
-  // === Helper to create satellite buttons ===
-  const createSatelliteButton = (className, svgIcon) => {
-    const btn = document.createElement("div");
-    btn.className = `showme-satellite-button ${className}`;
-    const icon = document.createElement("div");
-    icon.className = "showme-satellite-icon";
-    icon.innerHTML = svgIcon;
-    btn.appendChild(icon);
-    return btn;
-  };
-
-  // === SVG icons (minified) ===
-  const icons = {
-    close: `<svg viewBox="0 0 24 24" fill="white"><path d="M18.3 5.71L12 12l6.3 6.29-1.42 1.42L12 14.83l-6.29 6.3-1.42-1.42L10.59 12 4.29 5.71 5.71 4.29 12 10.59l6.29-6.3z"/></svg>`,
-    mic: `<svg viewBox="0 0 24 24" fill="white"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2z"/></svg>`,
-    pencil: `<svg viewBox="0 0 24 24" fill="white"><path d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm2.92.92L14.06 10l1.06 1.06L6.98 19.23H5.92v-1.06z"/></svg>`,
-    expand: `<svg viewBox="0 0 24 24" fill="white"><path d="M4 4h6V2H2v8h2V4zm16 0v6h2V2h-8v2h6zM4 20v-6H2v8h8v-2H4zm16-6v6h-6v2h8v-8h-2z"/></svg>`,
-  };
-
-  // === Create buttons ===
-  const btnClose = createSatelliteButton("showme-btn-close", icons.close);
-  const btnMic = createSatelliteButton("showme-btn-mic", icons.mic);
-  const btnPencil = createSatelliteButton("showme-btn-pencil", icons.pencil);
-  const btnExpand = createSatelliteButton("showme-btn-expand", icons.expand);
-
-  // === Create main button ===
-  const mainBtn = document.createElement("div");
-  mainBtn.className = "showme-main-button";
-  const iconDiv = document.createElement("div");
-  iconDiv.className = "showme-main-icon";
-  mainBtn.appendChild(iconDiv);
-
-  // === Append buttons ===
-  container.appendChild(btnClose);
-  container.appendChild(btnMic);
-  container.appendChild(btnPencil);
-  container.appendChild(btnExpand);
-  container.appendChild(mainBtn);
-  document.body.appendChild(container);
-
-  // === Add sample handlers ===
-  btnClose.onclick = () => alert("Close ShowMe");
-  btnMic.onclick = () => alert("Mic toggled");
-  btnPencil.onclick = () => alert("Drawing mode toggled");
-  btnExpand.onclick = () => alert("Expanded");
-  mainBtn.onclick = () => alert("Flush audio or activate");
-
 })();
-
 
